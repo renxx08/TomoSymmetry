@@ -36,8 +36,6 @@ def calculate_Ref_profile_symmetry(refData):
     # 每个点的对称性值
     symmetryData = np.array(deltaSym)
     symmetryData = np.divide(symmetryData,valueMax)
- 
-
     return symmetryIndex, symmetryData
 
 # 计算测量数据的对称性函数
@@ -67,10 +65,6 @@ def calculate_Measured_profile_symmetry(measuredData):
     for xx_interp in x_inter_index:
         if xx_interp == 0:
             break
-        # 正序 value_inter_index[xx_interp+250]
-        # print(xx_interp, '=',xx_interp+250,'=',value_inter_index[xx_interp+250])
-        # 逆序 value_inter_index[250-xx_interp]
-        # print(xx_interp, '=',250-xx_interp, '=',value_inter_index[250-xx_interp])
         symmetricIndexData.append(value_inter_index[xx_interp+250] - value_inter_index[250-xx_interp])
     
     symmetricIndex = max(symmetricIndexData)
