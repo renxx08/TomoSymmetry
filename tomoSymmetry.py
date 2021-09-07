@@ -62,10 +62,20 @@ def calculate_Measured_profile_symmetry(measuredData):
     x_inter_index=np.arange(-250,251,1)
     value_inter_index = interpolateF(x_inter_index)
 
+    # 按坐标对比插值,[-250,250]对应value的下标是[0,500]
+    symmetricIndexData = []
+    for xx_interp in x_inter_index:
+        if xx_interp == 0:
+            break
+        # 正序 value_inter_index[xx_interp+250]
+        # print(xx_interp, '=',xx_interp+250,'=',value_inter_index[xx_interp+250])
+        # 逆序 value_inter_index[250-xx_interp]
+        # print(xx_interp, '=',250-xx_interp, '=',value_inter_index[250-xx_interp])
+        symmetricIndexData.append(value_inter_index[xx_interp+250] - value_inter_index[250-xx_interp])
+    
+    symmetricIndex = max(symmetricIndexData)
 
-    print(x_inter_index,value_inter_index,len(value_inter_index))
-
-    return 
+    return  symmetricIndex, symmetricIndexData
 
 # python入口
 def main():
@@ -93,9 +103,16 @@ def main():
             if(rowNum > 7):              
                 measuredData.append(row)
                    
-    symmetryMeaData = calculate_Measured_profile_symmetry(measuredData)
-      
+    symmetryMeaIndex, symmetryMeaData = calculate_Measured_profile_symmetry(measuredData)
 
+    print (refFile,'金标的对称性参数==',symmetryGSIndex)
+    print (measuredFile,'测量数据对称性参数==',symmetryMeaIndex)
+
+    x_index=np.arange(0,250,1)
+    pl.plot(x_index,symmetryGSData,label='GS')
+    pl.plot(x_index,symmetryMeaData,label='Measured')  
+    pl.legend(loc="lower right")  
+    pl.show()
 
 if __name__ == "__main__":
     main()
