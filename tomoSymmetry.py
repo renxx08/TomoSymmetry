@@ -14,28 +14,34 @@ def calculate_Ref_profile_symmetry(refData):
     dataInfo = []
     value = []
     deltaSym = []
+
+    # 先计算金标函数如何归一的，是100最大值归一还是1的最大值归一
     for refRow in refData:
-        if(refRow[2] == '0.000000'): #只需要找一半
+        value.append(float(refRow[4]))
+
+    valueMax=max(value)
+
+    for refRow in refData:
+        if(float(refRow[2]) == 0): #只需要找一半
             break
+        if(float(refRow[4]) < (valueMax*0.2)): #只找20%以上的
+            continue
         for reversedRow in reversedRefData:
             if(refRow[2][1:] == reversedRow[2]):
                 # -x的坐标和value,x的坐标和value,以及差值,调试用
                 dataInfo.append([refRow[2],float(refRow[4]),reversedRow[2],float(reversedRow[4]),float(refRow[4]) - float(reversedRow[4])])
-                # value用来求最大值
-                value.append(float(refRow[4]))
-                value.append(float(reversedRow[4]))
                 # 差值的list
-                deltaSym.append(float(refRow[4]) - float(reversedRow[4]))
+                indexData = float(refRow[4])/float(reversedRow[4])
+                if indexData<1:
+                    indexData = 1/indexData
+                deltaSym.append(indexData)
                 break
   
-    valueMax = max(value)       
-    deltaSymMax = max(deltaSym)    
+    symmetryIndex = max(deltaSym)    
 
-    # 对称性值（即差值最大值，然后归一化）
-    symmetryIndex = deltaSymMax/valueMax
     # 每个点的对称性值
     symmetryData = np.array(deltaSym)
-    symmetryData = np.divide(symmetryData,valueMax)
+
     return symmetryIndex, symmetryData
 
 # 计算测量数据的对称性函数
@@ -63,9 +69,14 @@ def calculate_Measured_profile_symmetry(measuredData):
     # 按坐标对比插值,[-250,250]对应value的下标是[0,500]
     symmetricIndexData = []
     for xx_interp in x_inter_index:
+        if(value_inter_index[xx_interp+250] < (max(value_inter_index)*0.2)): #只找20%以上的
+            continue
         if xx_interp == 0:
             break
-        symmetricIndexData.append(value_inter_index[xx_interp+250] - value_inter_index[250-xx_interp])
+        indexData = value_inter_index[xx_interp+250]/value_inter_index[250-xx_interp]
+        if indexData<1:
+            indexData = 1/indexData
+        symmetricIndexData.append(indexData)
     
     symmetricIndex = max(symmetricIndexData)
 
@@ -82,7 +93,7 @@ def main():
             lenRow = len(row)
             
             if(lenRow > 5):
-                if(row[3] == '15.000000'):     # 只需要水下15的数据
+                if(row[3][0:2] == '15' and float(row[3]) == 15):     # 只需要水下15的数据
                     referenceData.append(row)
 
     symmetryGSIndex, symmetryGSData = calculate_Ref_profile_symmetry(referenceData)
@@ -102,9 +113,15 @@ def main():
     print (refFile,'金标的对称性参数==',symmetryGSIndex)
     print (measuredFile,'测量数据对称性参数==',symmetryMeaIndex)
 
-    x_index=np.arange(0,250,1)
-    pl.plot(x_index,symmetryGSData,label='GS')
-    pl.plot(x_index,symmetryMeaData,label='Measured')  
+    # 计算时候是从边缘到0点，绘图时候要取反
+    symmetryGSData = symmetryGSData[::-1]
+    GS_index = np.arange(0,len(symmetryGSData),1)
+
+    symmetryMeaData = symmetryMeaData[::-1]
+    Mea_index = np.arange(0,len(symmetryMeaData),1)
+
+    pl.plot(GS_index,symmetryGSData,label='GS')
+    pl.plot(Mea_index,symmetryMeaData,label='Measured')  
     pl.legend(loc="lower right")  
     pl.show()
 
