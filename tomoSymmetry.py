@@ -5,8 +5,8 @@ from scipy import interpolate
 import pylab as pl
 
 ## 文件目录
-refFile = 'testdata/Radixact_WTGold_J7mm_Transverse_June2017.csv'
-measuredFile = 'testdata/Tran_J07_20210818_Pro.csv'
+refFile = '/Users/renxinxin/ownProject/Python/TomoSymmetry/testdata/Radixact_WTGold_J42mm_Transverse_June2017.csv'
+measuredFile = '/Users/renxinxin/ownProject/Python/TomoSymmetry/testdata/J42_processed.csv'
 
 # 计算金标的对称性函数
 def calculate_Ref_profile_symmetry(refData):
